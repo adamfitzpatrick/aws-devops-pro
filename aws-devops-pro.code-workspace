@@ -1,0 +1,26 @@
+{
+  "folders": [
+    {
+      "path": ".",
+      "name": "full-workspace"
+    },
+    {
+      "path": "domains/one",
+      "name": "Domain One: SDLC Automation"
+    }
+  ],
+  "settings": {
+    "typescript.tsdk": ".yarn/sdks/typescript/lib",
+    "typescript.enablePromptUseWorkspaceTsdk": true,
+    "search.exclude": {
+      "**/.yarn": true,
+      "**/.pnp.*": true
+    },
+    "files.autoSave": "onFocusChange"
+  },
+  "extensions": {
+    "recommendations": [
+      "arcanis.vscode-zipfs"
+    ]
+  }
+}

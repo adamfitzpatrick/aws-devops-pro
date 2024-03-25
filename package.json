@@ -1,0 +1,10 @@
+{
+  "name": "aws-devops-pro",
+  "packageManager": "yarn@4.1.1",
+  "workspaces": [
+    "domains/*"
+  ],
+  "dependencies": {
+    "typescript": "^5.4.3"
+  }
+}
