@@ -13,9 +13,13 @@ The repo is organized to give overviews of each of the AWS services evaluated in
 - Domain Five
 - Domain Six
 
-## Labs and Demonstrators
+## A Note on CloudFormation & AWS CDK
 
-*Note: the deployable applications in this repo rely heavily upon AWS Cloud Development Kit for rapid configuration and deployment of required infrastructure.  This technology is described in detail as part of AWS DevOps Pro Domain Two, but can be used easily prior to reviewing that material.*
+Although CloudFormation and AWS CDK are specifically covered under Domain Two, service-specific documentation and study guides within this repository may include CloudFormation & CDK details relevant to the service in question, such as Resource Types, Properties, and Classes. Additionally, the deployable applications in this repo rely heavily upon AWS Cloud Development Kit for rapid configuration and deployment of required infrastructure.
+
+Please refer to the appropriate parts of Domain Two for background on this information.
+
+## Labs and Demonstrators
 
 Please note that labs and demos in this repository are centered around the Node.js ecosystem.  Scripts and deployments have been evaluated using the following software versions: 
 
