@@ -30,3 +30,71 @@ custom operations dashboard.
 software release process using the console interface, the AWS CLI, AWS CloudFormation, or
 the AWS SDKs. You can easily specify the tests to run and customize the steps to deploy your
 application and its dependencies.
+
+## Required Knowledge
+
+- CodePipeline is a tool which provides a visual workflow to orchestrate CI/CD
+- Based on "stages":
+    - Basic stage set:
+        - Source: CodeCommit, ECR, S3, Bitbucket, GitHub, +
+        - Build: CodeBuild, Jenkins, CloudBees, TeamCity, +
+        - Test: CodeBuild, AWS Device Farm, +
+        - Deploy: CodeDeploy, Elastic Beanstalk, CloudFormation, ECS, S3, +
+        - Invoke: Lambda, Step Functions
+            - Can be used to follow up/evaluate CodeBuild/CodeDeploy actions, for example
+    - Each stage can include multiple sequential and/or parallel actions
+- Actions
+    - Various stage types constrain the actions available for that stage
+    - Each action has an owner (AWS/3rd party/Custom), action type, provider
+    - Each type of action includes a specific number of valid input and output artifacts
+- Artifacts
+    - May be source data, build output, test results, invoke result, +
+    - may be passed from stage to stage and may be included in final output
+    - Stored in S3 bucket
+- Security
+    - An IAM service role must be attached to a pipeline which proper permissions to allow execute stages & actions
+    - Lack of proper permissions is common source of stage failures
+- CloudWatch Events (EventBridge) can monitor pipeline state changes and respond to them
+    - Stage failure spawns events and info about the failure
+    - Events can trigger SNS (sending texts or emails to users), lambda, +
+    - Can use lambda to diagnose/respond to failures
+    - Useful for approval process
+        - Pipeline approval requires `codepipeline:GetPipeline` and `codepipeline:PutApprovalResult` permissions
+- Using with CloudFormation
+    - Target of Deploy or Build actions, such as deploying lambda using CDK or SAM
+    - Can work with CloudFormation stack sets
+    - Can use/manage Template Parameter Overries including
+        - predefined/static overrides
+        - Dynamic overrides
+            - Retrieving parameters from input artifacts passed from prior stages
+            - Retrieve from SSM param store
+        - Param names must be present in template
+    - Action modes
+        - Create/replace change set
+        - Execute change set
+        - Create/update stack
+        - Delete stack
+        - Replace failed stack
+    - Example workflow:
+        - Build: CodeBuild creates template
+        - Deploy: CloudFormation deploys infrastructure and app code
+        - Build: CodeBuild runs tests on deployed application
+        - Deploy: CloudFormation deletes test infrastructure
+        - Deploy: CloudFormation deploys production infrastructure and application
+    - Best Practices
+        - Multi-environment deploy
+            - 1 pipeline, 1 CodeDeploy -> execute parallel deploy to multiple deployment groups
+            - *not* multiple CodeDeploy deployments
+        - Multiple actions that can run parallel should do so
+            - Set RunOrder value for parallel actions to the same value
+            - Example: Source (CodeCommit) -> Two parallel CodeBuild actions
+        - Deploy to pre-prod (dev/test/stage) before deploying to prod, and include a deployment gate requiring approval to proceed
+    - Multi-region pipelines
+        - Actions in pipeline can operate in different regions
+            - Example: Deploy a lambda function through CloudFormation into multiple regions
+        - S3 artifact stores *must* be defined in each region in which actions will occur
+            - CodePipeline must have read/write access into every artifact bucket involved
+            - Once input artifact names are specified, CodePipeline will handle copying from region to region
+
+## Console Lab
+    
