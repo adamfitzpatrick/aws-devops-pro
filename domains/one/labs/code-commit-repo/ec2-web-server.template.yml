@@ -1,0 +1,101 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Deploy a web server serving a custom HTML page
+
+Parameters:
+  WebServerAmi:
+    Type: String
+    Description: AMI ID for the web server instance
+    Default: ami-0395649fbe870727e
+  WebSiteSourcesUrl:
+    Type: String
+    Description: URL to use with the Sources field in cfn-init
+
+Resources:
+  WebServerIamRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+  WebServerIamInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref WebServerIamRole
+
+  WebServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable HTTP access
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+
+  WebServerInstance:
+    Type: AWS::EC2::Instance
+    Metadata:
+      AWS::CloudFormation::Init:
+        configSets:
+          default: ["install", "configure"]
+        install:
+          packages:
+            yum:
+              httpd: []
+          files:
+            "/etc/cfn/cfn-hup.conf":
+              content: !Sub |
+                [main]
+                stack=${AWS::StackName}
+                region=${AWS::Region}
+                interval=1
+            "/etc/cfn/hooks.d/cfn-auto-reloader.conf":
+              content: !Sub |
+                [cfn-auto-reloader-hook]
+                triggers=post.update
+                path=Resources.MyInstance.Metadata.AWS::CloudFormation::Init
+                action=/opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource MyInstance --configsets default --region ${AWS::Region}
+                runas=root
+        configure:
+          sources:
+            /var/www/html: !Ref WebSiteSourcesUrl
+          services:
+            sysvinit:
+              httpd:
+                enabled: "true"
+                ensureRunning: "true"
+    Properties:
+      ImageId: !Ref WebServerAmi
+      InstanceType: t2.micro
+      IamInstanceProfile: !Ref WebServerIamInstanceProfile
+      KeyName: foo1
+      SecurityGroups:
+        - Ref: WebServerSecurityGroup
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          yum update -y aws-cfn-bootstrap
+          # Initialize cfn-init
+          /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource WebServerInstance --configsets default --region ${AWS::Region}
+          # Start cfn-hup
+          /opt/aws/bin/cfn-hup || error_exit 'cfn-hup failed'
+          # Signal success
+          /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource WebServerInstance --region ${AWS::Region}
+  
+Outputs:
+  WebsiteURL:
+    Description: URL of the website
+    Value: !Sub "http://${WebServerInstance.PublicDnsName}/"

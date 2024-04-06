@@ -1,5 +1,5 @@
 {
-  "app": "npx ts-node --prefer-ts-exts bin/code-commit.ts",
+  "app": "npx ts-node --prefer-ts-exts bin/domain-one.ts",
   "watch": {
     "include": [
       "**"

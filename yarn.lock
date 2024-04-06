@@ -36,25 +36,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@aws-dvp/domain-one@workspace:domains/one":
-  version: 0.0.0-use.local
-  resolution: "@aws-dvp/domain-one@workspace:domains/one"
-  dependencies:
-    "@types/jest": "npm:^29.5.12"
-    "@types/node": "npm:20.11.19"
-    aws-cdk: "npm:2.130.0"
-    aws-cdk-lib: "npm:2.130.0"
-    constructs: "npm:^10.0.0"
-    jest: "npm:^29.7.0"
-    source-map-support: "npm:^0.5.21"
-    ts-jest: "npm:^29.1.2"
-    ts-node: "npm:^10.9.2"
-    typescript: "npm:^5.4.3"
-  bin:
-    domain-one: bin/domain-one.js
-  languageName: unknown
-  linkType: soft
-
 "@babel/code-frame@npm:^7.0.0, @babel/code-frame@npm:^7.12.13, @babel/code-frame@npm:^7.23.5, @babel/code-frame@npm:^7.24.1, @babel/code-frame@npm:^7.24.2":
   version: 7.24.2
   resolution: "@babel/code-frame@npm:7.24.2"
@@ -464,6 +445,25 @@ __metadata:
   checksum: 10c0/05c5368c13b662ee4c122c7bfbe5dc0b613416672a829f3e78bc49a357a197e0218d6e74e7c66cfcd04e15a179acab080bd3c69658c9fbefd0e1ccd950a07fc6
   languageName: node
   linkType: hard
+
+"@dvp-course/domain-one@workspace:domains/one":
+  version: 0.0.0-use.local
+  resolution: "@dvp-course/domain-one@workspace:domains/one"
+  dependencies:
+    "@types/jest": "npm:^29.5.12"
+    "@types/node": "npm:20.11.19"
+    aws-cdk: "npm:2.130.0"
+    aws-cdk-lib: "npm:2.130.0"
+    constructs: "npm:^10.0.0"
+    jest: "npm:^29.7.0"
+    source-map-support: "npm:^0.5.21"
+    ts-jest: "npm:^29.1.2"
+    ts-node: "npm:^10.9.2"
+    typescript: "npm:^5.4.3"
+  bin:
+    domain-one: bin/domain-one.js
+  languageName: unknown
+  linkType: soft
 
 "@isaacs/cliui@npm:^8.0.2":
   version: 8.0.2
