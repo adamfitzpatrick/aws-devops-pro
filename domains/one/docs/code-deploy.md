@@ -54,19 +54,20 @@ Deployment strategies section of this document.
     - Deploy stages
 
         ```mermaid
-        flowchart LR;
-        BeforeBlockTraffic-->BlockTraffic;
-        BlockTraffic-->AfterBlockTraffic;
-        AfterBlockTraffic-->ApplicationStop;
-        ApplicationStop-->DownloadBundle;
-        DownloadBundle-->BeforeInstall;
-        BeforeInstall-->Install;
-        Install-->AfterInstall;
-        AfterInstall-->ApplicationStart;
-        ApplicationStart-->ValidateService;
-        ValidateService-->BeforeAllowTraffic;
-        BeforeAllowTraffic-->AllowTraffic;
-        AllowTraffic-->AfterAllowTraffic;
+        flowchart LR
+            subgraph one[Load Balancer]
+                direction TB
+                BeforeBlockTraffic-->BlockTraffic-->AfterBlockTraffic
+            end
+            subgraph two[Installation]
+                direction TB
+                ApplicationStop-->DownloadBundle-->BeforeInstall-->Install-->AfterInstall-->ApplicationStart-->ValidateService
+            end
+            subgraph three[Load Balancer]
+                direction TB
+                BeforeAllowTraffic-->AllowTraffic-->AfterAllowTraffic
+            end
+            one-->two-->three
         ```
 
     - Methods
