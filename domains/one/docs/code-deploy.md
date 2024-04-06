@@ -54,13 +54,21 @@ Deployment strategies section of this document.
     - Deploy stages
 
         ```mermaid
-        graph TD;
-            A-->B;
-            A-->C;
-            B-->D;
-            C-->D;
+        flowchart LR;
+        BeforeBlockTraffic-->BlockTraffic;
+        BlockTraffic-->AfterBlockTraffic;
+        AfterBlockTraffic-->ApplicationStop;
+        ApplicationStop-->DownloadBundle;
+        DownloadBundle-->BeforeInstall;
+        BeforeInstall-->Install;
+        Install-->AfterInstall;
+        AfterInstall-->ApplicationStart;
+        ApplicationStart-->ValidateService;
+        ValidateService-->BeforeAllowTraffic;
+        BeforeAllowTraffic-->AllowTraffic;
+        AllowTraffic-->AfterAllowTraffic;
         ```
-        
+
     - Methods
         - In-Place
             - Can define deploy speed
