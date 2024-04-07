@@ -67,6 +67,9 @@ Deployment strategies section of this document.
                 direction TB
                 BeforeAllowTraffic-->AllowTraffic-->AfterAllowTraffic
             end
+            style one fill:#a6a5f9,stroke:#000
+            style two fill:#fff,stroke:#000
+            style three fill:#a6a5f9,stroke:#000
             one-->two-->three
         ```
 
@@ -80,7 +83,7 @@ Deployment strategies section of this document.
             - Can select autoscaling groups for replacement using tags
                 - When identified by ASG, any new instances will receive the deploy
             - When a load balancer in use, traffic is stopped to the instances being updated
-            - Hooks
+            - Hooks (stages where scripts allowed)
                 - BeforeBlockTraffic (when a load balancer is in place)
                 - AfterBlockTraffic (with load balancer)
                 - ApplicationStop
@@ -106,7 +109,129 @@ Deployment strategies section of this document.
                         - terminationWaitTimeInMinutes
                             - number of minutes to wait after successful deploy before carrying out the action property
             - Hooks are same as for in-place deploy, but execute differently based on whether they are blue or green instances
-                - Green instances start at ApplicationStop because they initially have no traffice
-                - Blue instances get BeforeBlockTraffic, BlockTraffic and AfterBlockTraffic
+                - Green instances start at `ApplicationStop` because they initially have no traffic
+                - Blue instances get `BeforeBlockTraffic`, `BlockTraffic` and `AfterBlockTraffic`
+    - Agent
+        - Must be running on EC2 and on-premises instances
+        - Can be installed automatically with Systems Manager in EC2
+        - EC2 instances must have sufficient privileges
+    - Triggers
+        - During deploy, CodeDeploy generates several events which can be published to SNS
+            - DeploymentStart
+            - DeploymentSuccess
+            - DeploymentFailure
+            - DeploymentStop
+            - DeploymentRollback
+            - DeploymentReady
+            - InstanceStart
+            - InstanceSuccess
+            - InstanceFailure
+            - InstanceReady (Blue/Green deployment only)
+- Lambda
+    - Automates traffic shifting for lambda aliases to perform deploys
+    - Integrates with SAM framework
+    - No CodeDeploy agent is required
+    - Process:
+        - Ensure alias is established pointing at currently deployed function version
+        - Specify version information in appspec.yml file
+        - CodeDeploy deploys new function version, and updates to point the alias at the new version
+    - hooks
+        - scripts for hooks must be lambda functions
+        - only `BeforeAllowTraffic` and `AfterAllowTraffic`
+    - appspec.yml example:
 
+        ```yaml
+        version: 0.0
+        Resources:
+            - myLambdaFunction:
+                Type: AWS::Lambda::Function
+                Properties:
+                    Name: myLambdaFunction
+                    Alias: myLambdaFunctionAlias
+                    CurrentVersion: 1
+                    TargetVersion: 2
+        ```
+    - Methods
+        - linear
+            - Shift *x%* of traffic to new version every *y%*
+        - canary
+            - Initially shift *x%* of traffic to new version for *y%* minutes, then shift remainder
+            - Allows new version to be verified with subset of traffic, then released to all traffice
+        - AllAtOnce
+            - Shift all traffic to new version simultaneously
+    - example (CodePipeline):
+        
+        ```mermaid
+        flowchart TB
+        push(dev pushes changes to repo)-->cc(source stage pulls from CodeCommit)-->cb(CodeBuild deploys new function version\nand places appspec.yml file in S3)-->cd(CodeDeploy updates alias and shifts traffic)
+        ```
+
+- ECS
+    - Automates deployment of new ECS task definition
+    - No CodeDeploy agent is required
+    - only permits blue/green deployments
+        - Initial deployment to green
+        - Developer must create new task definition, publish container images and create appspec.yml file
+        - Can use Canary, Linear or AllAtOnce strategies just like Lambda deployments
+    - Stages
+
+        ```mermaid
+        flowchart TB
+        BeforeInstall-->Install-->AfterInstall-->AllowTestTraffic-->AfterAllowTestTraffic-->BeforeAllowTraffic-->AllowTraffic-->AfterAllowTraffic
+        ```
+        
+    - Hooks
+        - All scripts must be lambda functions
+        - Permitted for `BeforeInstall`, `AfterInstall`, `AfterAllowTestTraffic`, `BeforeAllowTraffic`, `AfterAllowTraffic`
+    - appspec.yml example
+
+        ```yaml
+        version: 0.0
+        Resources:
+            - TargetService:
+                Type: AWS::ECS::Service
+                Properties:
+                    TaskDefinition: “arn:aws:ecs:aws-region: aws-account:task-definition/ecs-task-def-name:revision-number”
+                    LoadBalancerInfo:
+                    ContainerName: “whatevs”
+                    ContainerPort: 9999
+        ```
+
+    - Example (CodePipeline)
+
+        ```mermaid
+        flowchart TB
+        push(dev pushes changes with ECR image definition and appspec.yml)-->cc(source stage pulls from CodeCommit)-->cb(CodeBuild pushes ECR image, creates ECS\ntask definition, places appspec in S3)-->cd(CodeDeploy uses appspec file as input artifact)
+        ```
+
+- Deployment configurations
+    - Specified number of instances that must remain available at any time during deploy
+    - Can use pre-defined deployment configs
+        - CodeDeployDefault.AllAtOnce
+        - CodeDeployDefault.HalfAtATime
+        - CodeDeployDefault.OneAtATime
+    - Can also create custom deploy config
+- Redeploy & Rollbacks
+    - Can be
+        - Automatic (when deploy fails or when CloudWatch threshold is met)
+        - Manual
+        - Disabled
+    - When a rollback occurs, the last known good revision is deployed as a *new deployment*.
+- Common Troubleshooting
+    - InvalidSignatureException: data and time on EC2 instances must match signature date of the deploy request
+    - When the deploy, or when all lifecycle events are skipped in EC2/on-prem deployments, and one of the following errors is shown:
+        - `Overall deployment failed because too many individual instances failed deployment`
+        - `Too few healthy instances are available for deployment`
+        - `Some instances in your deployment group are experiencing problems (Error code: HEALTH_CONSTRAINTS)`
+        - The source may be
+            - CodeDeploy Agent might not be installed, running or reachable
+            - CodeDeploy service role or IAM instance profile might not have required permissions
+            - You're using HTTP proxy, and didn't configure CodeDeploy Agent with `:proxy_uri:` parameter
+            - Date and time mismatch between CodeDeploy and agent(s)
+    - Deploying to an ASG during a scale-out event may result in some instances in the ASG having out-dated versions
+        - CodeDeploy automatically starts a follow-on deploy to update any outdated EC2 instances
+    - Blue/Green failing `AllowTraffic`
+        - ELB may have incorrectly configured health checks
+
+## Console Lab
 
