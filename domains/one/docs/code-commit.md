@@ -136,8 +136,10 @@ functions in response to the repository events you choose.
 
 ### Clone & Commit
 
+*Note: it is recommended that you add the contents of the [ec2-web-server lab](../labs/ec2-web-server/) to the repo in this section in order to facilitate later labs.*
+
 1. Clone the repo using standard git commands.  The commands including the repo URL can be copied directly from the console.
-1. Add content to the repo, commit the change and push.  You should be prompted for credentials if required.  It is possible to use the AWS CLI credential helper via `git config --global credential.helper '!aws codecommit credential-helper $@'` (Refer to the [credential-helper docs](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/codecommit/credential-helper/index.html)).
+1. Add the contents of the [ec2-web-server lab](../labs/ec2-web-server/) folder to your git folder, commit the change and push.  You should be prompted for credentials if required.  It is possible to use the AWS CLI credential helper via `git config --global credential.helper '!aws codecommit credential-helper $@'` (Refer to the [credential-helper docs](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/codecommit/credential-helper/index.html)).
 1.  Return to the AWS console and verify your changes have been pushed to the repo.
 
 ### Use Identity Policies to Restrict Access
@@ -145,7 +147,7 @@ functions in response to the repository events you choose.
 *If you also have broader privileges such as those included with the **AdministratorAccess** policy, restricting access in this manner will not work.  You will need to remove the broader permissions first.*
 
 1. Modify the IAM policy created above by changing "codecommit:*" to "codecommit:GitPull"
-1. Make a local change to the repo, commit it, and attempt to push.
+1. Add a text file to the repo, commit the change and attempt to push the change.
 1. Verify that your push was rejected with a 403.
 
 ### Use Identity Policies to Protect Branches
@@ -176,7 +178,7 @@ functions in response to the repository events you choose.
     }
     ```
 
-1. Make another change, commit it, and push (to the main branch)
+1. Remove the text file you created in the previous section, commit it, and push (to the main branch)
 1. Verify that your push was rejected with the message "You don't have permission to push changes to this branch"
 1. Checkout a new branch named "dev", make your changes to the new branch, and push.
 1. Verify that you can push changes to a non-main branch.
@@ -220,3 +222,5 @@ functions in response to the repository events you choose.
 1. Log back in using the credentials you used to create the PR.
 1. Return to the PR in CodeCommit.
 1. Note that a green "Approved" badge has replaced the "0 of 1 rules satisfied" badge, and that a "Merge" button is now available next to "Close pull request"
+
+*Note: if you followed all of the previous steps, your repo should match the contents of the [ec2-web-server lab](../labs/ec2-web-server/) folder, which makes later labs easier.*
