@@ -1,0 +1,10 @@
+version: 0.0
+os: linux
+files:
+  - source: /index.html
+    destination: /var/www/html
+  - source: /script.js
+    destination: /var/www/html
+hooks:
+  AfterInstall:
+    - location: /codedeploy-after-install.sh

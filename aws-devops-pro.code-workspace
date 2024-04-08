@@ -16,7 +16,8 @@
       "**/.yarn": true,
       "**/.pnp.*": true
     },
-    "files.autoSave": "onFocusChange"
+    "files.autoSave": "onFocusChange",
+    "editor.rulers": [80, 100]
   },
   "extensions": {
     "recommendations": [
