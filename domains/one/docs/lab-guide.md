@@ -27,4 +27,6 @@ want to clean up the resources in an account after I finish a course or training
 ## Suggested Learning Path
 
 1. [CodeCommit console lab](./code-commit.md#console-lab)
-1. [CodeDeploy console lab](./code-deploy.md)
+1. [CodeBuild console lab](./code-build.md#console-lab)
+1. [CodeArtifact console lab](./code-artifact.md#console-lab)
+1. [CodeDeploy console lab](./code-deploy.md#console-lab)

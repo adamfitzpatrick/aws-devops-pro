@@ -5,6 +5,10 @@
       "name": "full-workspace"
     },
     {
+      "path": "related-learning",
+      "name": "Related learning"
+    },
+    {
       "path": "domains/one",
       "name": "Domain One: SDLC Automation"
     }

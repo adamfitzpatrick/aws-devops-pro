@@ -1,0 +1,11 @@
+version: 0.0
+Resources:
+  - DemoLambda:
+      Type: AWS::Lambda::Function
+      Properties:
+          Name: demo-lambda-2
+          Alias: dev
+          CurrentVersion: 2
+          TargetVersion: 3
+Hooks:
+  - BeforeAllowTraffic: CodeDeployHook_before-allow-traffic

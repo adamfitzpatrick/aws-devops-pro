@@ -1,3 +1,4 @@
-!labs/**/*.js
+!labs/code-deploy-ec2/*.js
 labs/.yarn
 labs/.pnp.cjs
+dist

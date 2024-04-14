@@ -172,6 +172,9 @@ available for each type of deploy
     - hooks
         - scripts for hooks must be lambda functions
         - only `BeforeAllowTraffic` and `AfterAllowTraffic`
+        - Since lambda can be asynchronous, need to make a call to
+        PutLifecycleEventHookExecutionStatusCommand to tell CodeDeploy when the hook lambda has
+        completed
     - appspec.yml example:
 
         ```yaml
@@ -305,9 +308,9 @@ attached policies.
     - Under "Advanced", leave everything default except "IAM instance profile": in this field,
     select the `ec2-role-for-codedeploy` you created above.
 If you navigate to the public IP address for this instance, you will see that it is not reachable.
-1. Review the appspec file in [ec2-web-server lab folder](../labs/ec2-web-server/).  Note that
+1. Review the appspec file in [code-deploy-ec2 lab folder](../labs/code-deploy-ec2/).  Note that
 CodeDeploy will copy website content to the standard httpd distribution folder, and will run the
-bash script in codedeploy-after-install.sh during the AfterInstall lifecycle stage.  Zip the
+bash script in codedeploy-before-allow-traffic.sh during the AfterInstall lifecycle stage.  Zip the
 contents of the lab folder and place the zipfile in an S3 bucket of your choosing. *NOTE: THE BUCKET
 MUST BE IN THE SAME REGION AS YOUR CODEDEPLOY APPLICATION.*
 1. Navigate to CodeDeploy, and click on "Create application".  Enter a catchy name for the app, and
@@ -337,8 +340,8 @@ Create an auto scaling group which uses this launch template.  During ASG creati
 a new Load Balancer, and configure an Application Load Balancer which targets the existing EC2
 instance. Verify the load balancer is functioning by navigating to its public address; you should
 see the same simple web page displayed at the end of the previous section.
-1. Make a modification to the [index.html](../labs/ec2-web-server/index.html) file inside the
-[ec2-web-server lab folder](../labs/ec2-web-server/) which you will be able to see in the web site.
+1. Make a modification to the [index.html](../labs/code-deploy-ec2/index.html) file inside the
+[code-deploy-ec2 lab folder](../labs/code-deploy-ec2/) which you will be able to see in the web site.
 Zip up the new package and deploy it over the original zip file in S3.
 1. Create a new deployment group in CodeDeploy. Give the new deployment group a suitable name, and 
 attach the `codedeploy-to-ec2-role` IAM role to it.  Select the "Blue/green" deployment type, 
@@ -358,26 +361,24 @@ short time later the old instances are terminated.
 1. Create a new IAM role for CodeDeploy (`codedeploy-for-lambda`):
     - Trust relationships: codedeploy.amazonaws.com
     - Managed policy: AWSCodeDeployRoleForLambda
-1. Create a Node.js 20.x function in AWS Lambda and copy the contents of
-[index.mjs](../labs/simple-lambda-function/index.mjs) from the
-[simple-lambda-function lab folder](../labs/simple-lambda-function/) to the
-function code. Publish the function, and create an alias called `dev` to point
-to the published version.
-1. Make a small change to the lambda function code, and publish the updated code
-to a new version.
-1. Examine the [appspec](../labs/simple-lambda-function/appspec.yml) file for
-this lab. Ensure the Name field matches the name of your AWS function. Note the
-Alias version (`dev`), CurrentVersion (1) and TargetVersion (2).  Your function
-alias should currently be pointing to version 1, and CodeDeploy will handle the
-transition.  Upload the appspec file to an S3 bucket (in the same region as your
-deployment). Ensure that the appspec.yml object in S3 has the following tag/value
-pair:
+1. Create a Node.js 20.x function in AWS Lambda named "demo-lambda" and copy the contents of
+[index.mjs](../labs/code-deploy-lambda/index.mjs) from the
+[code-deploy-lambda lab folder](../labs/code-deploy-lambda/) to the function code. Publish the
+function, and create an alias called `dev` to point to the published version.
+1. Make a small change to the lambda function code, and publish the updated code to a new version.
+1. Examine the [appspec](../labs/simple-lambda-function/appspec.yml) file for this lab. Ensure the
+Name field matches the name of your AWS function. Note the Alias version (`dev`), CurrentVersion (1)
+and TargetVersion (2).  Your function alias should currently be pointing to version 1, and
+CodeDeploy will handle the transition.  Upload the appspec file to an S3 bucket (in the same region
+as your deployment), and ensure it is nested under an S3 "folder" named "CodeDeploy" (in other
+words, the object key should be "CodeDeploy/**/appspec.yml"). Ensure that the appspec.yml object in
+S3 has the following tag/value pair:
 
     ```
     UseWithCodeDeploy: true
     ```
 
-This is necessary due to the way the AWSCodeDeployRoleForLambda is configured.
+This placement and tagging is due to the way the AWSCodeDeployRoleForLambda is configured.
 I encourage you to check it out.
 1. In lambda, select the `dev` alias, and run a test to verify that the response
 is from version 1.
@@ -400,3 +401,54 @@ the alias several times.  You should not approximately half the responses
 come from the original function version, and half come from the updated version.
 1. Wait for the deployment to complete fully, and test the function again.
 Now all responses come from the new function.
+
+### Use Hooks During Lambda Deployment
+
+1. Create an IAM role for a new lambda function:
+    - Trust relationship: lambda.amazonaws.com
+    - Statement 1:
+        - Allows: logs.CreateLogGroup
+        - Resource: arn:aws:logs:<region>:<account>:*
+    - Statement 2:
+        - Allows:
+            - logs.CreateLogStream
+            - logs.PutLogEvents
+        - Resource: arn:aws:logs:<region>:<account>:log-group:/aws/lambda/CodeDeployHook_before-allow-traffic:*
+    - Statement 3:
+        - Allows:
+            - lambda:UpdateFunctionConfiguration
+        - Resource: arn:aws:lambda:<region>:<account>:function:demo-lambda
+    - Statement 4:
+        - Allows:
+            - codedeploy:PutLifecycleEventHookExecutionStatus
+        - Resource: *
+Replace <region> and <account> above with your own values.  This is nearly identical to the default
+execution role that lambda automatically creates for a new function, with the addition of statement 3.
+1. Create a second lambda function running Node.js 20.x, name it "CodeDeployHook_before-allow-traffic"
+and assign the role you created above as the execution policy. Copy the code from
+[CodeDeployHook_before-allow-traffic.mjs](../labs/code-deploy-lambda/CodeDeployHook_before-allow-traffic.mjs)
+into the function. Examine the code for this function to note a couple of things:
+    - This function is updating the Environment for the original lambda, and specifically targets
+    version 3 to do so.
+    - The new function calls CodeDeploy to update it on the lifecycle hook status
+1. Note that, in the [index.mjs](../labs/code-deploy-lambda/index.mjs) code, the response includes
+an ENVIRONMENT_VAR, but no value is returned because the environment variable is not set.  In this
+lab, we use the BeforeAllowTraffic hook to set an environment variable for the function. Modify the
+[appspec.yml file](../labs/code-deploy-lambda/appspec.yml) as follows:
+
+    ```yaml
+    ...
+          CurrentVersion: 2
+          TargetVersion: 3
+    Hooks:
+      - BeforeAllowTraffic: CodeDeployHook_before-allow-traffic
+    ```
+Make a modification to demo-lambda, and publish the changes to version 3.  Upload the updated
+appspec file to the same location as before, and re-run the deployment. Once traffic has begun
+shifting, test the function with the "dev" alias.  Note that the function will return the
+environment value only for the most recent function deploy, and that test responses will oscillate
+between the most recent and previous deployments until the full transition has been completed.
+
+### Deploying to ECS with CodeDeploy
+
+### Using Hooks During ECS Deployment

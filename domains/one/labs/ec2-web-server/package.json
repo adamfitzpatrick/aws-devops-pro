@@ -1,7 +1,0 @@
-{
-  "name": "code-commit-repo",
-  "packageManager": "yarn@4.1.1",
-  "scripts": {
-    "test": "node ./script.test.js"
-  }
-}
