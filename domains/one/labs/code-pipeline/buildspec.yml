@@ -1,0 +1,38 @@
+version: 0.2
+
+env:
+  variables:
+    FUNCTION_NAME: 'demo-lambda-2'
+    ALIAS: 'dev'
+phases:
+  install:
+    on-failure: ABORT
+    runtime-versions:
+      nodejs: 20.x
+    commands:
+      - corepack enable
+      - yarn
+  pre_build:
+    on-failure: ABORT
+    commands:
+      - CURRENT_VERSION=$(aws lambda get-alias --function-name $FUNCTION_NAME --name $ALIAS | jq -r '.FunctionVersion')
+      - TARGET_VERSION=$((CURRENT_VERSION + 1))
+      - sed 's/%CURRENTVERSION%/%CURRENT_VERSION%/' -i appspec.template
+      - sed 's/%TARGETVERSION%/%TARGET_VERSIONT%/' -i appspec.template
+      - echo "Current lambda version $CURRENT_VERSION"
+      - echo "Target lambda version $TARGET_VERSION"
+  build:
+    on-failure: ABORT
+    commands:
+      - yarn build
+      - cp appspec.template ./dist/appspec.yml
+artifacts:
+  files: []
+  secondary-artifacts:
+    BuildArtifact:
+      files: './dist/index.js'
+      discard-paths: yes
+    AppSpecArtifact:
+      files: './dist/appspec.yml'
+      discard-paths: yes
+      s3-prefix: 'CodeDeploy'

@@ -11,3 +11,19 @@ Amplify empowers developers with a flexible collection of modular cloud services
 Amplify provides tooling for building app backends, connecting app frontends to backend resources, and hosting frontend apps.
 
 For end-to-end fullstack development, you would use Amplify to host your app’s frontend, provision backend resources either visually or through a command line, and build your app’s frontend user interface with Figma-to-code generation and Amplify’s frontend libraries. While this diagram shows a complete Amplify flow, you can also use each piece independently—for example, just host your frontend or use UI components to build out your app’s frontend.
+
+## Required Knowledge
+
+- Web and mobile application development tool which can dramatically simplify dev process
+by automatically creating various application layers
+- Use Amplify CLI to generate auth, storage, api, CI/CD, analytics and AI/ML layers
+    - Everything gets configured in one place
+    - Add frontend libraries to connect to backend
+    - Build and deploy with Amplicy Console and CloudFront
+- Can connect to source code from GitHub, CodeCommit, BitBucket
+- Connect CodeCommit to Amplify deploy for each branch, and amplify will keep the app
+updated
+
+## Console Lab
+
+TODO

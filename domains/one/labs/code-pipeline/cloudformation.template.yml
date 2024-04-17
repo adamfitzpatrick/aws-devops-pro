@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: |
+  Simple template to deploy a small lambda application
+Parameters:
+  Runtime:
+    Description: Lambda runtime to use with the application
+    Type: String
+    Default: nodejs20.x
+  LambdaArtifactBucket:
+    Description: CodePipeline artifact bucket for lambda code
+    Type: String
+  LambdaArtifactKey:
+    Description: Key where the lambda code is found
+    Type: String
+  
+Resources:
+  DemoLambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          Effect: Allow
+          Principal:
+            Service:
+              - lambda.amazonaws.com
+          Action:
+            - sts:AssumeRole
+      RoleName: demo-lambda-execution-role
+  DemoLambdaLoggingPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+            Resource: !Sub
+              - arn:aws:logs:${region}:${account}:*
+              - region: !Ref 'AWS::Region'
+                account: !Ref 'AWS::AccountId'
+      PolicyName: demo-lambda-logging-policy
+      Roles:
+        - !Ref DemoLambdaExecutionRole
+  DemoFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket: !Ref LambdaArtifactBucket
+        S3Key: !Ref LambdaArtifactKey
+      FunctionName: demo-lambda
+      Handler: index.handler
+      Role: !GetAtt DemoLambdaExecutionRole.Arn
+      Runtime: !Ref Runtime
+  DemoFunctionVersion:
+    Type: AWS::Lambda::Version
+    Properties:
+      FunctionName: !Ref DemoFunction

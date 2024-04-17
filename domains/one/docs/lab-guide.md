@@ -26,7 +26,16 @@ want to clean up the resources in an account after I finish a course or training
 
 ## Suggested Learning Path
 
-1. [CodeCommit console lab](./code-commit.md#console-lab)
-1. [CodeBuild console lab](./code-build.md#console-lab)
-1. [CodeArtifact console lab](./code-artifact.md#console-lab)
-1. [CodeDeploy console lab](./code-deploy.md#console-lab)
+Although it is worth bearing in mind the way AWS breaks down the various knowledge domains for this
+certification, I suggest modifying the learning order a bit because may AWS services integrate in
+such a way that knowledge of services from a "later" domain helps with practical understanding of
+services from an "earlier" domain.  For example, CloudFormation is so incredibly useful with
+CodePipeline that it is worth learning those fundamentals before undertaking the CodePipeline labs.
+
+1. [CodeCommit](./code-commit.md)
+1. [CodeBuild](./code-build.md)
+1. [CodeArtifact](./code-artifact.md)
+1. [CodeDeploy](./code-deploy.md)
+1. [EC2 Image Builder](./code-deploy.md)
+1. [CodeGuru](./code-guru.md)
+1. [CodePipeline](./code-pipeline.md)

@@ -21,7 +21,12 @@
       "**/.pnp.*": true
     },
     "files.autoSave": "onFocusChange",
-    "editor.rulers": [80, 100]
+    "editor.rulers": [80, 100],
+    "yaml.customTags": [
+      "!Ref scalar",
+      "!Sub sequence",
+      "!GetAtt scalar"
+    ]
   },
   "extensions": {
     "recommendations": [

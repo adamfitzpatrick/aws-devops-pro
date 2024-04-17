@@ -66,15 +66,18 @@ application and its dependencies.
     - Change made to the source location
     - Can have multiple revisions flowing through the pipe at the same time
 - Security
-    - An IAM service role must be attached to a pipeline which proper permissions to allow execute stages & actions
+    - An IAM service role must be attached to a pipeline which proper permissions to allow execute
+    stages & actions
     - Lack of proper permissions is common source of stage failures
-    - Supports Amazon VPC endpoints via AWS PrivateLink -> keeps all traffic inside the VPC and AWS network
+    - Supports Amazon VPC endpoints via AWS PrivateLink -> keeps all traffic inside the VPC and AWS
+    network
 - CloudWatch Events (EventBridge) can monitor pipeline state changes and respond to them
     - Stage failure spawns events and info about the failure
     - Events can trigger SNS (sending texts or emails to users), lambda, +
     - Can use lambda to diagnose/respond to failures
     - Useful for approval process
-        - Pipeline approval requires `codepipeline:GetPipeline` and `codepipeline:PutApprovalResult` permissions
+        - Pipeline approval requires `codepipeline:GetPipeline` and `codepipeline:PutApprovalResult`
+        permissions
 - Using with CloudFormation
     - Target of Deploy or Build actions, such as deploying lambda using CDK or SAM
     - Can work with CloudFormation stack sets
@@ -103,38 +106,121 @@ application and its dependencies.
         - Multiple actions that can run parallel should do so
             - Set RunOrder value for parallel actions to the same value
             - Example: Source (CodeCommit) -> Two parallel CodeBuild actions
-        - Deploy to pre-prod (dev/test/stage) before deploying to prod, and include a deployment gate requiring approval to proceed
+        - Deploy to pre-prod (dev/test/stage) before deploying to prod, and include a deployment
+        gate requiring approval to proceed
     - Multi-region pipelines
         - Actions in pipeline can operate in different regions
             - Example: Deploy a lambda function through CloudFormation into multiple regions
         - S3 artifact stores *must* be defined in each region in which actions will occur
             - CodePipeline must have read/write access into every artifact bucket involved
-            - Once input artifact names are specified, CodePipeline will handle copying from region to region
+            - Once input artifact names are specified, CodePipeline will handle copying from region
+            to region
         - Use CloudWatch Events for change detection
 
 ## Console Lab
 
-*Ensure you have an existing CodeCommit repository, such as that created in the [CodeCommit console lab](./code-commit.md#console-lab).  Additionally, you will be required to have an S3 bucket in which to deposit your initial build output.*
+*Ensure you have an existing CodeCommit repository, such as that created in the
+[CodeCommit console lab](./code-commit.md#console-lab).  Additionally, you will be required to have
+an S3 bucket in which to deposit your initial build output.*
     
-### Create Minimal Pipeline
+### Create Minimal Pipeline with CodeDeploy stage
 
-1. In the AWS console, navigate to CodePipeline, and click "Create pipeline", and give the new pipeline a catchy name. Ensure the Pipeline type is set to V2
-    - Has a JSON structure like V1, but includes additional parameters such as Git tag triggers and pipeline-level variables
+1. If you have not completed the CodeDeploy labs or if you removed the demo application from
+CodeDeploy, return to the lab and complete the
+[third CodeDeploy lab](./code-deploy.md#deploy-an-application-to-lambda). Make a change to the
+lambda you created in that lab, and publish it as the next available version.  Modify the appspec
+file in the [CodeDeploy lambda lab folder](../labs/code-deploy-lambda/) so that it correctly
+references the current version and the target version you just published. Replace the current
+content of your CodeCommit repository with the contents of the CodeDeploy lambda folder.  Commit
+the changes to the main branch and push your changes.
+1. In the AWS console, navigate to CodePipeline, and click "Create pipeline", and give the new
+pipeline a catchy name. Ensure the Pipeline type is set to V2
+    - Has a JSON structure like V1, but includes additional parameters such as Git tag triggers and
+    pipeline-level variables
 1. Select "Superseded" under Execution mode
     - Pipelines using "Superseded" allow a more recent execution to overtake an older one (default)
     - In "Queued" pipelines, executions are processed one-by-one in the order received
-    - "Parallel" pipelines don't wait for other executions to complete before starting or completing a new execution
-1. Select "New service role" if you have never created a pipeline before, or choose "Existing service role" and select a Role ARN from the dropdown list. Under "Advanced settings", ensure the Artifact store is "Default location" and encryption key is "Default AWS Managed Key". Click "Next"
-1. For Source provider, select "AWS CodeCommit", select an existing repo, and select an existing branch name. Under "Change detection options" ensure CloudWatch Events is selected, and under "Output artifact format", ensure "CodePipeline default" is chosen. Click "Next"
+    - "Parallel" pipelines don't wait for other executions to complete before starting or completing
+    a new execution
+1. Select "New service role" if you have never created a pipeline before, or choose "Existing
+service role" and select a Role ARN from the dropdown list. Under "Advanced settings", ensure the
+Artifact store is "Default location" and encryption key is "Default AWS Managed Key". Click "Next"
+1. For Source provider, select "AWS CodeCommit", select the repo in which you placed the
+[CodeDeploy lambda lab](../labs/code-deploy-lambda/), and select the main branch. Under "Change
+detection options" ensure CloudWatch Events is selected, and under "Output artifact format", ensure
+"CodePipeline default" is chosen. Click "Next"
 1. Click "Skip build stage", and then "Skip" in the confirmation dialog
-1. Under "Deploy provider", select "Amazon S3", choose an available bucket, and enter a suitable name for the deploy output S3 object key. Click "Next".
-1. Click "Create pipeline". Observe the progress of your new pipeline, and verify that it completes successfully
+1. Under "Deploy provider", select "AWS CodeDeploy", and select the CodeDeploy application you
+created in [part 1 of the CodeDeploy lab](./code-deploy.md#deploy-an-application-to-lambda).
+Select a deployment group under that application.
+1. Click "Create pipeline". Observe the progress of your new pipeline, and verify that it completes
+successfully. Test the dev alias for your function to verify that your changes were deployed.
 
-### Add CloudFormation Deploy
+### Add Unit Test/Build stage
 
-# Maybe revamp this to use CodeDeploy ? #
+1. Let's combine the work from the [CodeBuild lab](../labs/code-build/) with the CodeDeploy lab. If
+you haven't completed this lab, or if you deleted the build project, return to it and complete
+[part 1](./code-build.md#create-a-codebuild-project). *Delete* the lambda you created for the
+CodeDeploy lambda lab, as we're going to let CloudFormation create the function and create new
+versions for us.
+1. Create a new build project called 'demo-test', select AWS CodeCommit as the source provider, and
+leave everything at default values except:
+    - Service role: Use the same one that you used for the CodeBuild lab project
+    - Buildspec: Click "Use a buildpsec file" and enter "testspec.yml" for the file name.
+    - Artifact 1 should be placed in a bucket of your choosing and should be zipped
+    - Artifact 2 is named "appspec" and should be placed in the same bucket as artifact 1, but not
+    zipped
+Scroll down and click "Create build project".
+1. Return to your CodePipeline codepipeline lick on "Disable transition" between the Source and
+Deploy stages, enter any reason and click "Disable" in the dialog. Click "Edit" near the top of the
+page, and scroll down to just before the Deploy stage. Click "Add stage". Name the new stage
+"Build-Test" and click "Add stage". Now click "Add action group", enter "Unit_Test". Select "AWS
+CodeBuild" as the provider. "Input artifacts" should be set to the Source artifact, and project name
+should be "demo-test". Click "Done"
+1. Click "Add action" next to the Unit_Test action. Add a second CodeBuild action, but name this one
+"Build".  Select the Source artifact for input, and enter "demo-build" for the build project.  Click
+"Done", and then scroll to the top and click "Done".
+1. Copy the files in
+[CodePipeline lab folder](../labs/code-pipeline/) to your local repo, overwriting the 
+`buildspec.yml`. Commit the changes, and push the repo.  Your pipeline should now execute and
+progress through the build stages successfully.
+1. Note that the build has succeeded *and* that there is now a "Queued execution" held between the
+Build_Test and Deploy stages.
+    - What we've done here is add an action to test the application which runs in parallel with an
+    action to build the application and perform the initial deploy steps, which include creation
+    of an appspec file for CodeDeploy.
+    - Note that, if either of these actions fails, the pipeline will not continue on to the Deploy
+    stage.
 
-1. Copy the contents of [../labs/code-commit-repo](../labs/code-commit-repo) into your source repository and commit the changes to the source branch.
+### Add CloudFormation Deploy Action
+
+1. Create a role for CloudFormation:
+    - 
+1. Edit your pipeline again, and, in the Deploy stage, click "+ Add action group" *before* the 
+Deploy action. For "Action name" enter "Deploy_Version", and for "Action provider" select "AWS 
+CloudFormation".  Add both the "SourceArtifact" and "BuildArtifact" from previous stages. Set
+"Action mode" to "Create or update a stack", and give your new stack a name such as "demo-stack".
+Under the "Template" section, "Artifact name" is "SourceArtifact", and "File name" is 
+"cloudformation.template.yml".  Select "CAPABILITY_NAMED_IAM" under "Capabilities" and use the
+role you created in the previous step.  Expand the "Advanced" area, and enter the following in the
+"Parameter overrides" text box:
+
+
+    ```json
+    {
+        "LambdaArtifactBucket": { "Fn::GetArtifactAtt": ["BuildArtifact", "BucketName"]},
+        "LambdaArtifactKey": { "Fn::GetArtifactAtt": ["BuildArtifact", "ObjectKey"]}
+    }
+    ```
+
+Click done to finish adding the action to the Deploy stage. Enable transitions between the Build and
+Deploy stages, and run the pipeline.  It should succeed through the **Deploy_Version** action, but
+fail on the **Deploy** action.
+1. Go to your lambda function.  You'll notice now that there is a published verion.  The function
+code was update by CloudFormation, which then published a new version.
+
+---
+
 1. Ensure an IAM role exists sufficient to deploy the application:
     - The role must have a trust relationship with CloudFormation:
 
@@ -162,12 +248,22 @@ application and its dependencies.
         - ec2:RunInstances
         - ec2:TerminateInstances
         - ec2:DeleteSecurityGroup
-            - *Note: this is required to allow CloudFormation to remove the instance when you are done.*
+            - *Note: this is required to allow CloudFormation to remove the instance when you are
+            done.*
     - For simplicity, the resource value for the above actions can be set to "*"
-1. Modify the pipeline created in the previous section by clicking "Edit". Scroll down to the "Deploy" stage and click "Edit stage". Click the pencil icon that appears on the Deploy action.
-1. Change the action provider from "Amazon S3" to "AWS CloudFormation". Change the Action mode to "Create or update a stack", and enter a suitable name for the stack. Select "SourceArtifact" in Artifact name, and enter the name of the web server template file into the File field (`ec2-web-server.template.yml` unless you changed it). Under "Capabilities", select `CAPABILITY_NAMED_IAM`. Under the "Role name" drop down, select the IAM roll you created above. Leave everything else as-is, and click "Done". For the Deploy stage, click "Done"
+1. Modify the pipeline created in the previous section by clicking "Edit". Scroll down to the
+"Deploy" stage and click "Edit stage". Click the pencil icon that appears on the Deploy action.
+1. Change the action provider from "Amazon S3" to "AWS CloudFormation". Change the Action mode to
+"Create or update a stack", and enter a suitable name for the stack. Select "SourceArtifact" in
+Artifact name, and enter the name of the web server template file into the File field
+(`ec2-web-server.template.yml` unless you changed it). Under "Capabilities", select
+`CAPABILITY_NAMED_IAM`. Under the "Role name" drop down, select the IAM roll you created above.
+Leave everything else as-is, and click "Done". For the Deploy stage, click "Done"
 1. Click "Release change" and observe the pipeline execution to confirm success.
-1. In CloudFormation, click on the newly created stack.  Click on "Output" and navigate to the WebsiteURL. Once you have verified that the web server is functioning, return to CodePipeline, and click on "Review" in the approval step. Approve the result and let the pipeline execution complete. Verify that the pipeline completed succesfully and your EC2 stack has been deleted.
+1. In CloudFormation, click on the newly created stack.  Click on "Output" and navigate to the
+WebsiteURL. Once you have verified that the web server is functioning, return to CodePipeline, and
+click on "Review" in the approval step. Approve the result and let the pipeline execution complete.
+Verify that the pipeline completed succesfully and your EC2 stack has been deleted.
 
 ### Add Testing and Approval Gate
 
@@ -179,4 +275,13 @@ application and its dependencies.
 1. Verify that the application has deployed successfully, then approve proceeding on the clean-up stage.
 1. Verify that the clean-up stage succeeds and removes the deployment.
 
-### Force Test Failure
+#### Redesign
+
+Goals:
+- ~~Create basic pipeline with CodeDeploy~~
+- Create basic pipeline with CloudFormation
+- Add Build/Test stage
+- Add manual approval
+- Incorporate SNS messaging
+- Add lambda invoke stage
+- Change source to GitHub

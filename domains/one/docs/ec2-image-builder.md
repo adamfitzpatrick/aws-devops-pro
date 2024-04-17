@@ -13,3 +13,22 @@ EC2 Image Builder significantly reduces the effort of keeping images up-to-date 
 providing a simple graphical interface, built-in automation, and AWS-provided security settings.
 With EC2 Image Builder, there are no manual steps for updating an image nor do you have to build
 your own automation pipeline.
+
+## Required Knowledge
+
+- Service used to automate creation, maintainence, validation and testing AMIs
+    - Runs on a schedule
+    - No charge other than those associated with active instances
+    - Publishes to multiple regions and accounts
+- CICD architecture
+    - Pipeline:
+        - CodeCommit: developer pushes new image configuration
+        - CodeBuild: Assembles image specifications
+        - CloudFormation calls EC2 image builder, which creates a new AMI
+        - second CloudFormation stage then performs rolling updates of Auto
+        Scaling Groups with the new AMI
+- Can use AWS Resource Access Manager to share images, recipes, and components across accounts
+or througout organizations
+- Can track latest AMIs in SSM Parameter Store with workflow:
+    - EC2 Image Builder -> EventBridge to SNS -> invoke Lambda -> lambda stores ID in SSM param
+    store

@@ -19,3 +19,31 @@ Amazon codebase.
 - **Amazon CodeGuru Profiler** Amazon CodeGuru Profiler analyzes the application runtime
 profile and provides intelligent recommendations and visualizations that guide developers on
 how to improve the performance of the most relevant parts of their code.
+
+## Required Knowledge
+
+- ML powered service for automated code reviews and performance recommendations
+- Two functions:
+    - Reviewer
+        - Automated static code analysis
+            - Finds critical issues, security vulnerabilities, deviations from common
+            best practices
+            - Supports Java and Python
+            - Secrets detector
+                - Finds hardcoded secrets and suggests remediation
+    - Profiler
+        - Shows app performance during runtime
+        - Makes recommendations
+        - Finds what consumes excessive capacity and can identify inefficiencies
+        - May help decrease compute costs
+        - Shows heap summary
+        - Anomaly detection
+        - Supports apps running on AWS or on-prem
+        - Minimal overhead
+        - Can be applied to lambda functions
+            - Decorator `@with_lambda_profiler`
+            - Or use console to enable
+
+## Console Lab
+
+TODO

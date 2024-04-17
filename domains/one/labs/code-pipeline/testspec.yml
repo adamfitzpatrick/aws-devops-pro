@@ -20,11 +20,3 @@ phases:
     on-failure: ABORT
     commands:
       - yarn test
-  build:
-    on-failure: ABORT
-    commands:
-      - yarn build
-artifacts:
-  files: './dist/index.js'
-  name: codebuild-demo-artifact
-  discard-paths: yes
