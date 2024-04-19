@@ -26,7 +26,8 @@
       "!Ref scalar",
       "!Sub sequence",
       "!GetAtt scalar"
-    ]
+    ],
+    "java.configuration.updateBuildConfiguration": "interactive"
   },
   "extensions": {
     "recommendations": [
