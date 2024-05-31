@@ -1,0 +1,65 @@
+# EC2
+
+- Consists of multiple services:
+    - Instances
+    - EBS volumes (Elastic Block Storage)
+    - ELB (Elastic Load Balancers)
+    - ASG (Auto-Scaling Groups)
+    - Elastic IP
+- Instances
+    - Can launch instances in console, CloudFormation, AWS APIs, etc
+    - Specify all params, such as OS, compute size, storage size, key-pair, IP
+    - Key Pair
+        - Traditionally used to ssh into instance
+        - Without a key pair, it is not possible to directly connect to the machine
+        - HOWEVER with a proper instance IAM profile can use SSM Session Manager to connect, so
+        no key pair is necessary *if* the instance is properly configured
+        - key pair private key must have proper privileges, or ssh won't be permitted: `chown 0400 <file.pem>`
+    - User data
+        - Allows automated configuration and scripts to be run on instance immediately after launch
+    - Connecting
+        - Can use ssh from terminal (requires key pair)
+        - Can use Instance Connect (no key pair required)
+        - Session Manager (requires an IAM instance profile which permits SSM access)
+        - Also EC2 serial console, but this requires instance to be authorized
+- Security groups
+    - function as firewalls between an instance or instances and the internet.
+    - Can set inbound and outbound rules, specify protocol, port, and eligible origin IP addresses
+- Internet gateway
+    - Provides access from a pool of private IPs to the internet.
+    - Public IP
+        - No two devices on the internet have the same public IP
+        - Allows the device to be connected over the internet
+        - easily geolocated
+    - Private IP
+        - Device can only be connected with a private network
+        - IP address must be unique *within* the network
+        - Devices connect to internet via Internet Gateway
+        - Only specified IP address ranges can be private
+    - By default, EC2 instance comes with both a private and a public IP address
+        - if machine is stopped and restarted it may be assigned a new IP address
+- User Data
+    - allows instances to be bootstrapped when started with specific commands
+    - Run *only once at the instance's first start*
+- Pricing depends on
+    - Region
+    - Instance type
+    - On-demand vs Spot vs Reserved vs Dedicated Host
+    - Billed by the second, to a minimum of 60s
+    - Do not pay if stopped
+    - Other costs such as storage, fixed IP & load balancing
+- AMI aws managed images
+    - the selection of OS images and config that can be run in EC2
+    - Unique by region
+    - Can be private or public
+    - Stored in S3, not in one of the owner's buckets
+- Instance Types
+    - RAM
+    - CPU
+        - C EC2 instances are optimized for # of cores or frequency
+        
+    - I/O speed
+    - Network bandwidth
+    - GPU
+- EBS
+    - Default is that when an instance with EBS is terminated, the EBS volume is destroyed

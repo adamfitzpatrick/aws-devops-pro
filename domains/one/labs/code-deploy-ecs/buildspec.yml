@@ -13,4 +13,4 @@ phases:
 
 artifacts:
   files:
-    - target/codepipelinedemo*
+    - target/codedeployecsdemo*

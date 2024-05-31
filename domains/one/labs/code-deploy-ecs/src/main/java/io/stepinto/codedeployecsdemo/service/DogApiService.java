@@ -1,10 +1,10 @@
-package io.stepinto.codepipelinedemo.service;
+package io.stepinto.codedeployecsdemo.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import io.stepinto.codepipelinedemo.dto.AllBreedsDTO;
+import io.stepinto.codedeployecsdemo.dto.AllBreedsDTO;
 
 @Service
 public class DogApiService {

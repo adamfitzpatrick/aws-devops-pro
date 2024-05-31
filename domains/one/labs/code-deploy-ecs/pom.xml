@@ -11,9 +11,9 @@
 	</parent>
 	
 	<groupId>io.stepinto</groupId>
-	<artifactId>codepipelinedemo</artifactId>
+	<artifactId>codedeployecsdemo</artifactId>
 	<version>1.0.0</version>
-	<name>codepipelinedemo</name>
+	<name>codedeployecsdemo</name>
 	
 	<description>Demo project for use with AWS CodePipeline and CodeDeploy</description>
 	

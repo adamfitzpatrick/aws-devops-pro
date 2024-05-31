@@ -1,4 +1,4 @@
-package io.stepinto.codepipelinedemo.service;
+package io.stepinto.codedeployecsdemo.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
@@ -23,7 +23,7 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.stepinto.codepipelinedemo.dto.AllBreedsDTO;
+import io.stepinto.codedeployecsdemo.dto.AllBreedsDTO;
 
 @SpringBootTest
 public class DogApiServiceTest {

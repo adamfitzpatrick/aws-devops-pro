@@ -1,13 +1,13 @@
-package io.stepinto.codepipelinedemo;
+package io.stepinto.codedeployecsdemo;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class CodepipelinedemoApplication {
+public class CodeDeployECSDemoApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(CodepipelinedemoApplication.class, args);
+		SpringApplication.run(CodeDeployECSDemoApplication.class, args);
 	}
 
 }

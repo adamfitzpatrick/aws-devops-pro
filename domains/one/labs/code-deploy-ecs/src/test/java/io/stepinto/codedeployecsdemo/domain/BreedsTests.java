@@ -1,4 +1,4 @@
-package io.stepinto.codepipelinedemo.domain;
+package io.stepinto.codedeployecsdemo.domain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -11,7 +11,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import io.stepinto.codepipelinedemo.dto.AllBreedsDTO;
+import io.stepinto.codedeployecsdemo.domain.Breeds;
+import io.stepinto.codedeployecsdemo.dto.AllBreedsDTO;
 
 @SpringBootTest
 public class BreedsTests {

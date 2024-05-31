@@ -27,7 +27,8 @@
       "!Sub sequence",
       "!GetAtt scalar"
     ],
-    "java.configuration.updateBuildConfiguration": "interactive"
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "java.compile.nullAnalysis.mode": "automatic"
   },
   "extensions": {
     "recommendations": [

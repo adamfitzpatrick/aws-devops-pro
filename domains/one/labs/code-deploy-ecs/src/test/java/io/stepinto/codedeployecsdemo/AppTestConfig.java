@@ -1,10 +1,10 @@
-package io.stepinto.codepipelinedemo;
+package io.stepinto.codedeployecsdemo;
 
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 
-import io.stepinto.codepipelinedemo.service.DogApiService;
+import io.stepinto.codedeployecsdemo.service.DogApiService;
 
 @TestConfiguration
 public class AppTestConfig {

@@ -1,4 +1,4 @@
-package io.stepinto.codepipelinedemo.controller;
+package io.stepinto.codedeployecsdemo.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.stepinto.codepipelinedemo.domain.Breeds;
-import io.stepinto.codepipelinedemo.service.DogApiService;
+import io.stepinto.codedeployecsdemo.domain.Breeds;
+import io.stepinto.codedeployecsdemo.service.DogApiService;
 
 @RestController
 @RequestMapping("match")

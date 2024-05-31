@@ -1,4 +1,4 @@
-package io.stepinto.codepipelinedemo.controller
+package io.stepinto.codedeployecsdemo.controller
 ;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -14,9 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 
-import io.stepinto.codepipelinedemo.AppTestConfig;
-import io.stepinto.codepipelinedemo.dto.AllBreedsDTO;
-import io.stepinto.codepipelinedemo.service.DogApiService;
+import io.stepinto.codedeployecsdemo.AppTestConfig;
+import io.stepinto.codedeployecsdemo.dto.AllBreedsDTO;
+import io.stepinto.codedeployecsdemo.service.DogApiService;
 
 @Import(AppTestConfig.class)
 @SpringBootTest

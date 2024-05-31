@@ -1,4 +1,4 @@
-package io.stepinto.codepipelinedemo.domain;
+package io.stepinto.codedeployecsdemo.domain;
 
 import java.util.function.Function;
 
@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import io.stepinto.codepipelinedemo.dto.AllBreedsDTO;
+import io.stepinto.codedeployecsdemo.dto.AllBreedsDTO;
 
 public class Breeds {
 

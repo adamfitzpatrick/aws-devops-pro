@@ -1,4 +1,4 @@
-package io.stepinto.codepipelinedemo;
+package io.stepinto.codedeployecsdemo;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;

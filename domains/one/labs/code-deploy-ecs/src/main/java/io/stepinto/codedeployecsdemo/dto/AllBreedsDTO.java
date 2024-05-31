@@ -1,4 +1,4 @@
-package io.stepinto.codepipelinedemo.dto;
+package io.stepinto.codedeployecsdemo.dto;
 
 import java.io.Serializable;
 import java.util.Arrays;
