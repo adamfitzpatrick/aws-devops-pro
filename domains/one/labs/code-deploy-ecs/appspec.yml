@@ -1,0 +1,9 @@
+version: 0.0
+Resources:
+  - TargetService:
+    Type: AWS::ECS::Service
+    Properties:
+      TaskDefinition: “arn:aws:ecs:aws-region:aws-account:task-definition/ecs-task-def-name:revision-number”
+      LoadBalancerInfo:
+      ContainerName: “whatevs”
+      ContainerPort: 9999

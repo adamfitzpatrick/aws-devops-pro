@@ -27,7 +27,7 @@ want to clean up the resources in an account after I finish a course or training
 ## Suggested Learning Path
 
 Although it is worth bearing in mind the way AWS breaks down the various knowledge domains for this
-certification, I suggest modifying the learning order a bit because may AWS services integrate in
+certification, I suggest modifying the learning order a bit because many AWS services integrate in
 such a way that knowledge of services from a "later" domain helps with practical understanding of
 services from an "earlier" domain.  For example, CloudFormation is so incredibly useful with
 CodePipeline that it is worth learning those fundamentals before undertaking the CodePipeline labs.

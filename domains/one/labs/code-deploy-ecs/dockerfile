@@ -1,3 +1,4 @@
-FROM openjdk:17-jdk-alpine
-COPY ./target/codedeployecsdemo-1.0.0.war codedeployecsdemo-1.0.0.war
-ENTRYPOINT [ "java", "-jar", "/codedeployecsdemo-1.0.0.war" ]
+FROM alpine:latest
+RUN apk add --no-cache bash
+COPY . $HOME
+ENTRYPOINT [ "./logger.sh" ]
