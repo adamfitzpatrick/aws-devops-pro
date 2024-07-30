@@ -451,29 +451,30 @@ between the most recent and previous deployments until the full transition has b
 
 ### Deploying to ECS with CodeDeploy
 
-1. You'll need an appropriate role for allowing CodeDeploy to update ECS, as well as a role for ECS task execution:
+1. You'll need an appropriate role for allowing CodeDeploy to update ECS:
     - CodeDeploy ECS role (`codedeploy-ecs-role`)
         - Trust relationship: codedeploy.amazonaws.com
         - Managed policy: AWSCodeDeployRoleForECS
     - ECS task execution role (`ecs-task-execution-role`):
         - Trust relationship: ecs-tasks.amazonaws.com
         - Managed policy: AmazonECSTaskExecutionRolePolicy
-1. Create a public ECR repository, name it "codedeployecslab/echo", and click "Create repository"
-1. Create an ECS cluster, give it a name, select "AWS Fargate" infrastructure, and click "Create"
-1. Create a new Task definition, call it "codedeployecslab" and leave all the default options, but ensure that the `ecs-task-execution-role` you created above is selected for "Task execution role". Under "Container - 1", enter any name, and enter the URI from the ECR repository you created above.  Ensure "Use log collection" is checked and that "awslogs-create-group" has a value of "true".  Scroll to the bottom and click "Create"
+1. Create a public ECR repository, name it "codedeployecslab/node-server", and click "Create repository"
 1. From within the `labs/code-deploy-ecs` folder, build the docker image:
 
     ```bash
-    docker build -t codedeployecslab/echo .
+    docker build -t codedeployecslab/node-server .
     ```
 Note that if you are building the image on a Mac, you may need to tell it you are on an AMD64 platform:
 
     ```bash
-    docker buildx build -t codedeployecslab/echo .
+    docker buildx build --platform=linux/amd64 -t codedeployecslab/node-server .
     ```
 Follow the push instructions associated with the ECR repository you created above to push the image.
-1. In your ECS cluster, create a new service, and set the Task definition Family to "codedeployecslab", give the service a name, scroll to the bottom of the page and click "Create"
-1. Wait for the service to start.  You can view the service logs by selecting the service you just created, and clicking on the "Logs" tab.  When the service is running successfully, you should see log messages of the form, "Running revision 1 at NNNNNNNNN".
+1. Deploy ECS infrastructure required for the lab with the included CloudFormation template:
+
+    ```bash
+    aws cloudformation create-stack --stack-name CodeDeployEcsDemo --template-body file://<relative_path_to_template_file> --parameters '[{"ParameterKey":"ContainerImageUri","ParameterValue":"<uri_for_your_image>"}]' --capabilities CAPABILITY_NAMED_IAM
+    ```
 1. Create a new application in CodeDeploy, give it a suitable name and select "Amazon ECS" as the compute platform
 1. Create a deployment group with a catchy name and select the `codedeploy-ecs-role` role for the Service role. Under "Environment configuration", select the cluster and service you created above.
 **TODO: How does the load balancer come in to this?  It is required for deployments to ECS**

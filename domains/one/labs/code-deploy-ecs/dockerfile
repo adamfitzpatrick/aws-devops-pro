@@ -1,4 +1,4 @@
-FROM alpine:latest
-RUN apk add --no-cache bash
-COPY . $HOME
-ENTRYPOINT [ "./logger.sh" ]
+FROM node:latest
+COPY server.mjs $HOME
+EXPOSE 8080
+ENTRYPOINT [ "node", "./server.mjs" ]
