@@ -208,6 +208,7 @@ specific addresses to specific ports to be routed to the desired targets.  Secur
 - Origin IP address (or destination address for egress rules)
 
 Security groups do not permit DENY rules, only ALLOW.  Anything not specifically allowed is blocked.
+Note that a security group evaluates *all* rules before permitting trafffic.
 
 Security groups are *stateful*.  This means that if an inbound request is allowed by an ingress
 rule, than a reply to the request will also be allowed without checking the egress rules.
