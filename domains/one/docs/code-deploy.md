@@ -213,6 +213,8 @@ available for each type of deploy
         - Developer must create new task definition, publish container images and create appspec.yml
         file
         - Can use Canary, Linear or AllAtOnce strategies just like Lambda deployments
+    - Requires your ECS-based application to include a Load Balancer with at least one production
+    listener and at least two Target Groups.
     - Stages
 
         ```mermaid
@@ -458,16 +460,17 @@ between the most recent and previous deployments until the full transition has b
     - ECS task execution role (`ecs-task-execution-role`):
         - Trust relationship: ecs-tasks.amazonaws.com
         - Managed policy: AmazonECSTaskExecutionRolePolicy
-1. Create a public ECR repository, name it "codedeployecslab/node-server", and click "Create repository"
+1. Create a public ECR repository, name it "codedeployecslab/apache", and click "Create repository"
 1. From within the `labs/code-deploy-ecs` folder, build the docker image:
 
     ```bash
-    docker build -t codedeployecslab/node-server .
+    docker build -t codedeployecslab/apache .
     ```
-Note that if you are building the image on a Mac, you may need to tell it you are on an AMD64 platform:
+Note that if you are building the image on a Mac, you will need to tell it you are on an AMD64
+platform:
 
     ```bash
-    docker buildx build --platform=linux/amd64 -t codedeployecslab/node-server .
+    docker buildx build --platform=linux/amd64 -t codedeployecslab/apache .
     ```
 Follow the push instructions associated with the ECR repository you created above to push the image.
 1. Deploy ECS infrastructure required for the lab with the included CloudFormation template:
@@ -475,8 +478,33 @@ Follow the push instructions associated with the ECR repository you created abov
     ```bash
     aws cloudformation create-stack --stack-name CodeDeployEcsDemo --template-body file://<relative_path_to_template_file> --parameters '[{"ParameterKey":"ContainerImageUri","ParameterValue":"<uri_for_your_image>"}]' --capabilities CAPABILITY_NAMED_IAM
     ```
-1. Create a new application in CodeDeploy, give it a suitable name and select "Amazon ECS" as the compute platform
-1. Create a deployment group with a catchy name and select the `codedeploy-ecs-role` role for the Service role. Under "Environment configuration", select the cluster and service you created above.
-**TODO: How does the load balancer come in to this?  It is required for deployments to ECS**
+
+1. Once the infrastructure is deployed, navigate to the Load Balancer created by the CloudFormation
+template, copy the DNS name, and paste it into a new browser tab.  You should see "Greetings from
+ECS Fargate, version 1!!".
+1. Modify `labs/code-deploy-ecs/index.html` so the `h1` tag indicates this is "version 2", rebuild
+the docker image, then tag it with "2" and push the new image to ECR.
+1. Create a new revision under the existing task definition created by CloudFormation.  The only
+is that it should reference your ECR image tagged "2".
+1. Create a new application in CodeDeploy, give it a suitable name and select "Amazon ECS" as the
+compute platform
+1. Create a deployment group with a catchy name and select the `codedeploy-ecs-role` role for the
+Service role. Under "Environment configuration", select the `codedeploy-ecs-demo-cluster`, and the
+service with a name like `CodeDeployEcsDemo-EcsService`. Select the `CodeDeployEcsDemoAlb` for your
+load balancer, and select the only production listener and target group available with this ALB.
+1. Under "Deployment Settings", click on "Create deployment configuration", give  your new
+deployment configuration a catchy name like "HalfAndHalf", select "Linear" as the type, enter "50"
+for the step value, and pick something short like 1 minute for the interval, so you can see the
+transition in action. Click "Create deployment configuration", and then make sure your new
+deployment configuration is selected for your new deployment group. Click "Create deployment group".
+1. Click "Create deployment".  Your new deployment group should already be selected.  Select "Use
+AppSpec editor", and select "YAML". Copy the contents of the `appspec.yml` file in this lab folder,
+and paste them into the AppSpec editor. Scroll down and click "Create deployment".
+1. Monitor the deployment, and when 50% has been deployed, reload the load balancer DNS name a few
+times.  You should see the application version oscillate between 1 and 2.  After the deployment
+finishes, it will settle on version 2.
+
+
+#### TODO Complete ECS CodeDeploy lab
 
 ### Using Hooks During ECS Deployment

@@ -1,5 +1,5 @@
 FROM httpd:latest
-COPY index.html /usr/local/apache2/htdocs/index.html
-RUN sed -i 's/^Listen 80$/Listen 8080/g' ./conf/httpd.conf
-RUN /usr/local/apache2/bin/apachectl -k restart
-EXPOSE 8080
+WORKDIR /usr/local/apache2
+COPY index.html htdocs/index.html
+RUN sed -i 's/^Listen 80$/Listen 8080/g' /usr/local/apache2/conf/httpd.conf
+RUN ./bin/apachectl -k restart

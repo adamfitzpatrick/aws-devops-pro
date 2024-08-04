@@ -1,9 +1,9 @@
 version: 0.0
 Resources:
   - TargetService:
-    Type: AWS::ECS::Service
-    Properties:
-      TaskDefinition: “arn:aws:ecs:aws-region:aws-account:task-definition/ecs-task-def-name:revision-number”
-      LoadBalancerInfo:
-      ContainerName: “whatevs”
-      ContainerPort: 9999
+      Type: AWS::ECS::Service
+      Properties:
+        TaskDefinition: "arn:aws:ecs:us-west-2:730335574269:task-definition/ecs-demo-1-EcsTaskDefinition-N9KjHvXa2A5s:2"
+        LoadBalancerInfo:
+          ContainerName: "codedeploy-ecs-demo-container"
+          ContainerPort: 8080
